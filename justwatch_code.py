@@ -1,13 +1,5 @@
-#search("Fight Club", "GB", "en", 5, True)
-#details("tm42409", "GB", "en", False)
-
 from simplejustwatchapi.justwatch import search, details
 import pandas as pd
-# Perform the search
-
-
-
-results = search("Fight Club", "GB", "en", 5, True)
 
 # Function to convert offers to a DataFrame
 def offers_to_dataframe(media_entries):
@@ -18,19 +10,27 @@ def offers_to_dataframe(media_entries):
             row = {
                 'Title': title,
                 'Platform': offer.package.name,
-                'url': offer.url,
+                'URL': offer.url,
                 'Monetization Type': offer.monetization_type,  
-                'presentation_type': offer.presentation_type,  
-                #'Price String': getattr(offer, 'price_string', 'N/A'),  # Use getattr for optional attributes
-                #'Price Currency': getattr(offer, 'price_currency', 'N/A'),  # Use getattr for optional attributes
-                'URL': offer.url  # Access url attribute
+                'Presentation Type': offer.presentation_type,  
             }
             rows.append(row)
     return pd.DataFrame(rows)
 
+# Read the Excel file with titles
+df_titles = pd.read_excel('test.xlsx')  # Replace 'titles.xlsx' with your file name
 
-# Convert offers to DataFrame
-df = offers_to_dataframe(results)
+# Initialize an empty DataFrame to store all results
+all_results = pd.DataFrame()
 
-# Print DataFrame
-print(df.to_string(index=False))
+# Iterate over each title in the "Titles" column and perform the search
+for title in df_titles['Title']:  # Replace 'Titles' with the exact column name in your Excel file
+    results = search(title, "GB", "en", 5, True)
+    df = offers_to_dataframe(results)
+    all_results = pd.concat([all_results, df], ignore_index=True)
+
+# Save the combined results to a new Excel file
+all_results.to_excel('offers_results.xlsx', index=False)  # Replace 'offers_results.xlsx' with your desired output file name
+
+# Optional: print the results to check
+print(all_results.to_string(index=False))
